@@ -30,7 +30,7 @@ class CustomerEntrypoint {
     }
 
     @GET
-    fun getList(): PanacheQuery<CustomerEntity> {
-        return CustomerEntity.findAll()
+    fun getList(): List<CustomerEntity> {
+        return CustomerEntity.findAll().list()
     }
 }
