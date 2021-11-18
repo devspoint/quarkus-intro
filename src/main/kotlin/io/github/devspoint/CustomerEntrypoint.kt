@@ -1,14 +1,11 @@
 package io.github.devspoint
 
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.core.MediaType
-import javax.ws.rs.Consumes
-import javax.ws.rs.POST
-import javax.ws.rs.GET
-import javax.ws.rs.PathParam
+import io.github.devspoint.springdata.CustomerSpringDataEntity
+import io.github.devspoint.springdata.CustomerSpringDataRepository
+import javax.inject.Inject
 import javax.transaction.Transactional
-import io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery
+import javax.ws.rs.*
+import javax.ws.rs.core.MediaType
 
 
 @Transactional
@@ -16,6 +13,9 @@ import io.quarkus.hibernate.orm.panache.kotlin.PanacheQuery
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 class CustomerEntrypoint {
+
+    @Inject
+    private lateinit var customerSpringDataRepository: CustomerSpringDataRepository
 
     @POST
     fun created(customer: CustomerEntity): CustomerEntity {
@@ -32,5 +32,25 @@ class CustomerEntrypoint {
     @GET
     fun getList(): List<CustomerEntity> {
         return CustomerEntity.findAll().list()
+    }
+
+    @DELETE
+    @Path("/{id}")
+    fun delete(@PathParam("id") id: Long) {
+        CustomerEntity.deleteById(id)
+    }
+
+    @PUT
+    @Path("/{id}")
+    fun update(@PathParam("id") id: Long, customer: CustomerEntity) {
+        CustomerEntity.findById(id)?.let {
+            it.copy(firstname = it.firstname, lastname = it.lastname)
+        }?.persist()
+    }
+
+    @GET
+    @Path("/spring")
+    fun getListSpring(@QueryParam("lastname") lastname: String): Iterable<CustomerSpringDataEntity>? {
+        return customerSpringDataRepository.findByLastname(lastname)
     }
 }
